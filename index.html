@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Bitácora de Guías</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#15191E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Guías">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root{
+    --asphalt:#15191E;--asphalt-2:#1E242B;--bg:#ECEAE4;--panel:#FFFFFF;--ink:#171C21;
+    --muted:#6B7682;--line:#D9D6CE;--line-soft:#E7E4DC;--amber:#E8930C;--amber-press:#C77A06;
+    --amber-soft:#FBEAC9;--green:#2E7D5B;--green-soft:#E2F0E8;--red:#C0392B;--red-soft:#F6E2DF;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;padding-bottom:40px}
+  .wrap{max-width:680px;margin:0 auto;padding:0 14px}
+
+  header.bar{background:var(--asphalt);color:#fff;padding:max(14px,env(safe-area-inset-top)) 0 0;position:sticky;top:0;z-index:20;box-shadow:0 2px 0 var(--amber)}
+  .bar .wrap{display:flex;align-items:center;gap:12px;padding-bottom:12px}
+  .logo{width:38px;height:38px;flex:0 0 auto;border-radius:8px;background:repeating-linear-gradient(45deg,var(--amber) 0 8px,var(--asphalt-2) 8px 16px);border:2px solid var(--amber)}
+  .title h1{font-size:16px;margin:0;letter-spacing:.04em;font-weight:700}
+  .title p{font-size:11.5px;margin:1px 0 0;color:#9AA6B0;letter-spacing:.08em;text-transform:uppercase}
+  .userbox{margin-left:auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+  .userbox .em{font-size:11px;color:#9AA6B0;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .userbox .out{background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+
+  nav.tabs{display:flex;background:var(--asphalt)}
+  nav.tabs .wrap{display:flex;padding:0}
+  .tab{flex:1;background:none;border:none;color:#9AA6B0;font-family:var(--sans);font-size:13.5px;font-weight:600;letter-spacing:.03em;padding:13px 6px;cursor:pointer;border-bottom:3px solid transparent;text-transform:uppercase}
+  .tab.active{color:#fff;border-bottom-color:var(--amber)}
+
+  section{display:none;padding-top:18px}
+  section.active{display:block}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  .field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+  label.lbl{display:block;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  input[type=text],input[type=email],input[type=password]{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;font-size:16.5px;font-family:var(--sans);background:#FBFAF7;color:var(--ink)}
+  input:focus{outline:none;border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px var(--amber-soft)}
+  input.guia{font-family:var(--mono);letter-spacing:.06em;font-weight:600}
+  select.sel{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;font-size:16.5px;font-family:var(--sans);background-color:#FBFAF7;color:var(--ink);appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 22px,calc(100% - 13px) 22px;background-size:5px 5px;background-repeat:no-repeat}
+  select.sel:focus{outline:none;border-color:var(--amber);background-color:#fff;box-shadow:0 0 0 3px var(--amber-soft)}
+  .row2{display:flex;gap:10px}.row2 .field{flex:1}
+
+  .photos{display:flex;gap:10px}
+  .ptile{flex:1;position:relative;border:2px dashed var(--line);border-radius:12px;background:#FBFAF7;aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;text-align:center;padding:10px}
+  .ptile.filled{border-style:solid;border-color:var(--green);padding:0}
+  .ptile img{width:100%;height:100%;object-fit:cover;display:block}
+  .ptile .cam{font-size:30px;line-height:1}
+  .ptile .ptxt{font-size:12px;color:var(--muted);margin-top:8px;font-weight:600}
+  .ptile .ptag{position:absolute;top:7px;left:7px;background:var(--asphalt);color:#fff;font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 7px;border-radius:5px;text-transform:uppercase}
+  .ptile .pretake{position:absolute;bottom:7px;right:7px;background:rgba(21,25,30,.82);color:#fff;font-size:11px;padding:5px 9px;border-radius:6px;font-weight:600}
+
+  .btn{width:100%;border:none;border-radius:11px;padding:15px;font-size:15.5px;font-weight:700;letter-spacing:.02em;cursor:pointer;font-family:var(--sans)}
+  .btn-primary{background:var(--amber);color:#241803}
+  .btn-primary:active{background:var(--amber-press)}
+  .btn-primary:disabled{background:#E7E4DC;color:#A9A89F;cursor:not-allowed}
+  .btn-ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--asphalt);color:#fff;padding:13px 20px;border-radius:11px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:90;box-shadow:0 8px 26px rgba(0,0,0,.3);max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{background:var(--red)}
+
+  .stats{display:flex;gap:10px;margin-bottom:14px}
+  .stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .stat .n{font-size:24px;font-weight:800;font-family:var(--mono);line-height:1}
+  .stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600}
+  .stat.warn .n{color:var(--amber-press)}
+
+  .toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .toolbar input[type=text]{flex:1;min-width:160px;padding:11px 13px;font-size:15px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+  .seg button{border:none;background:none;padding:10px 13px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--sans)}
+  .seg button.on{background:var(--asphalt);color:#fff}
+
+  .empty{text-align:center;color:var(--muted);padding:48px 20px}
+  .empty .big{font-size:34px;margin-bottom:10px}
+  .empty p{margin:4px 0;font-size:14px}
+
+  .rec{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden}
+  .rec-top{display:flex;align-items:center;gap:10px;padding:13px 14px 11px;border-bottom:1px dashed var(--line-soft)}
+  .rec-guia{font-family:var(--mono);font-weight:700;font-size:16px;letter-spacing:.04em;background:var(--asphalt);color:#fff;padding:5px 10px;border-radius:7px;white-space:nowrap}
+  .rec-guia .h{color:var(--amber);font-size:11px;margin-right:5px}
+  .rec-chip{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:5px 9px;border-radius:20px;white-space:nowrap}
+  .chip-pend{background:var(--amber-soft);color:var(--amber-press)}
+  .chip-done{background:var(--green-soft);color:var(--green)}
+  .rec-route{display:flex;align-items:center;gap:9px;padding:12px 14px;font-size:14.5px}
+  .rec-route .pt{flex:1;min-width:0}
+  .rec-route .pt .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+  .rec-route .pt .v{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rec-route .ar{color:var(--amber);font-size:18px;font-weight:800;flex:0 0 auto}
+  .rec-meta{display:flex;gap:14px;flex-wrap:wrap;padding:0 14px 11px;font-size:12.5px;color:var(--muted)}
+  .rec-meta b{color:var(--ink);font-weight:600}
+  .rec-cliente{padding:11px 14px;border-top:1px dashed var(--line-soft);display:flex;gap:8px;align-items:center}
+  .rec-cliente input{flex:1;padding:9px 11px;font-size:14px}
+  .rec-cliente .save{background:var(--green);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:var(--sans);white-space:nowrap}
+  .rec-actions{display:flex;border-top:1px solid var(--line-soft)}
+  .rec-actions button{flex:1;border:none;background:none;padding:12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:var(--sans)}
+  .rec-actions button+button{border-left:1px solid var(--line-soft)}
+  .rec-actions .del{color:var(--red)}
+
+  .modal{position:fixed;inset:0;background:rgba(10,12,15,.93);z-index:80;display:none;flex-direction:column}
+  .modal.open{display:flex}
+  .modal-bar{display:flex;align-items:center;gap:12px;padding:max(14px,env(safe-area-inset-top)) 16px 14px;color:#fff}
+  .modal-bar .mg{font-family:var(--mono);font-weight:700}
+  .modal-bar .close{margin-left:auto;background:rgba(255,255,255,.14);color:#fff;border:none;width:38px;height:38px;border-radius:9px;font-size:20px;cursor:pointer}
+  .modal-body{flex:1;overflow:auto;padding:0 12px 20px;display:flex;flex-direction:column;gap:12px}
+  .modal-body figure{margin:0}
+  .modal-body figcaption{color:#9AA6B0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:0 0 6px 2px}
+  .modal-body img{width:100%;border-radius:10px;display:block;background:#222}
+  .modal-body .nophoto{color:#7d8893;text-align:center;padding:30px;border:1px dashed #3a424b;border-radius:10px}
+
+  .footnote{color:var(--muted);font-size:11.5px;text-align:center;margin:18px 0 0;line-height:1.5}
+
+  /* ---------- Login ---------- */
+  #login{position:fixed;inset:0;background:var(--asphalt);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+  #login .box{width:100%;max-width:360px}
+  #login .brand{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:22px}
+  #login .brand .logo{width:44px;height:44px}
+  #login h2{color:#fff;font-size:20px;margin:0;letter-spacing:.03em}
+  #login .sub{color:#9AA6B0;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+  #login .card{background:#fff;border:none}
+  #login .err{background:var(--red-soft);color:var(--red);border-radius:9px;padding:10px 12px;font-size:13px;margin-bottom:12px;display:none}
+  #login .toggle{color:#9AA6B0;text-align:center;font-size:13px;margin-top:14px}
+  #login .toggle a{color:var(--amber);font-weight:600;cursor:pointer;text-decoration:underline}
+  .app-hidden{display:none !important}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login">
+  <div class="box">
+    <div class="brand">
+      <div class="logo"></div>
+      <div><h2>Bitácora de Guías</h2><div class="sub">Respaldos de transporte</div></div>
+    </div>
+    <div class="card">
+      <div class="err" id="loginErr"></div>
+      <div class="field">
+        <label class="lbl" for="l-email">Correo</label>
+        <input type="email" id="l-email" autocomplete="username" placeholder="tu@correo.cl">
+      </div>
+      <div class="field">
+        <label class="lbl" for="l-pass">Contraseña</label>
+        <input type="password" id="l-pass" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" id="loginBtn">Iniciar sesión</button>
+      <div class="toggle" id="loginToggle">
+        ¿No tienes cuenta? <a id="toSignup">Crear una</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app" class="app-hidden">
+  <header class="bar">
+    <div class="wrap">
+      <div class="logo" aria-hidden="true"></div>
+      <div class="title"><h1>BITÁCORA DE GUÍAS</h1><p>Respaldos de transporte</p></div>
+      <div class="userbox">
+        <span class="em" id="userEmail"></span>
+        <button class="out" id="logoutBtn">Salir</button>
+      </div>
+    </div>
+    <nav class="tabs">
+      <div class="wrap">
+        <button class="tab active" data-tab="reg">Registrar guía</button>
+        <button class="tab" data-tab="repo">Repositorio</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- REGISTRAR -->
+  <section id="reg" class="active">
+    <div class="wrap">
+      <div class="card">
+        <div class="field">
+          <label class="lbl" for="f-guia">N° de guía de despacho</label>
+          <input type="text" id="f-guia" class="guia" inputmode="numeric" placeholder="Ej: 226559" autocomplete="off">
+        </div>
+        <div class="row2">
+          <div class="field"><label class="lbl" for="f-origen">Dónde carga (origen)</label>
+            <input type="text" id="f-origen" placeholder="Ej: Iquique" autocomplete="off"></div>
+          <div class="field"><label class="lbl" for="f-destino">Dónde descarga (destino)</label>
+            <input type="text" id="f-destino" placeholder="Ej: Arica" autocomplete="off"></div>
+        </div>
+        <div class="field">
+          <label class="lbl" for="f-conductor">Conductor</label>
+          <select id="f-conductor" class="sel"></select>
+        </div>
+        <div class="field" id="otroWrap" style="display:none">
+          <label class="lbl" for="f-conductor-otro">Nombre del conductor</label>
+          <input type="text" id="f-conductor-otro" placeholder="Nombre y apellido" autocomplete="off">
+        </div>
+        <div class="row2">
+          <div class="field"><label class="lbl" for="f-camion">Patente camión</label>
+            <input type="text" id="f-camion" class="guia" placeholder="—" autocomplete="off"></div>
+          <div class="field"><label class="lbl" for="f-acoplado">Acoplado / plana</label>
+            <input type="text" id="f-acoplado" class="guia" placeholder="—" autocomplete="off"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <label class="lbl">Fotos del respaldo</label>
+        <div class="photos">
+          <label class="ptile" id="tile1" for="f1">
+            <span class="ptag">Foto 1 · Guía</span><span class="cam">📷</span>
+            <span class="ptxt">Tomar foto de la guía</span>
+          </label>
+          <label class="ptile" id="tile2" for="f2">
+            <span class="ptag">Foto 2 · Respaldo</span><span class="cam">📷</span>
+            <span class="ptxt">Tomar segunda foto</span>
+          </label>
+        </div>
+        <input type="file" id="f1" accept="image/*" capture="environment" hidden>
+        <input type="file" id="f2" accept="image/*" capture="environment" hidden>
+      </div>
+
+      <button class="btn btn-primary" id="saveBtn" disabled>Guardar registro</button>
+      <p class="footnote">Repositorio compartido: lo que guardes aquí lo verán todos los que tengan cuenta en esta app.</p>
+    </div>
+  </section>
+
+  <!-- REPOSITORIO -->
+  <section id="repo">
+    <div class="wrap">
+      <div class="stats">
+        <div class="stat"><div class="n" id="st-total">0</div><div class="l">Registros</div></div>
+        <div class="stat warn"><div class="n" id="st-pend">0</div><div class="l">Sin asignar</div></div>
+        <div class="stat"><div class="n" id="st-cli">0</div><div class="l">Clientes</div></div>
+      </div>
+      <div class="toolbar">
+        <input type="text" id="search" placeholder="Buscar guía, origen, destino o cliente…">
+        <div class="seg" id="filterSeg">
+          <button class="on" data-f="all">Todos</button>
+          <button data-f="pend">Sin asignar</button>
+          <button data-f="done">Asignados</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn-ghost btn" style="padding:10px;font-size:13.5px" id="reloadBtn">↻ Actualizar</button>
+        <button class="btn-ghost btn" style="padding:10px;font-size:13.5px" id="csvBtn">⬇ Exportar CSV</button>
+      </div>
+      <div id="repoList"></div>
+    </div>
+  </section>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-bar"><span class="mg" id="modalGuia"></span><button class="close" id="modalClose" aria-label="Cerrar">✕</button></div>
+  <div class="modal-body" id="modalBody"></div>
+</div>
+
+<datalist id="clientesList"></datalist>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+/* ============================================================
+   CONFIG — PEGA AQUÍ TUS DOS VALORES DE SUPABASE
+   • SUPABASE_URL  → Settings → API  (Project URL, ej: https://xxxx.supabase.co)
+   • SUPABASE_KEY  → Settings → API Keys → "Publishable key" (empieza con sb_publishable_).
+                     Si tu proyecto es antiguo y no la tiene, usa la "anon" (legacy).
+   Esta clave es pública y segura: las reglas RLS protegen los datos.
+============================================================ */
+const SUPABASE_URL = 'PEGA_AQUI_TU_PROJECT_URL';
+const SUPABASE_KEY = 'PEGA_AQUI_TU_PUBLISHABLE_KEY';
+/* ============================================================ */
+
+const BUCKET = 'respaldos';
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ---------- Flota (desde Flota.xlsx). Edita aquí para agregar/quitar. ---------- */
+const FLOTA = [
+  {c:"VLADEMIR PIZARRO",p:"RWTK-87",a:"PWWL-27"},{c:"JULIO VARGAS",p:"PRKV-34",a:"KDHP-80"},
+  {c:"SANTIAGO COILLA",p:"PFXZ-47",a:"KYPB-20"},{c:"NELSON CARDENAS",p:"RKSB-97",a:"PWVK47"},
+  {c:"HECTOR CONTRERAS",p:"RLCC-42",a:"PTYH-26"},{c:"FERNANDO HURTADO",p:"LXWR-98",a:"KYPB-19"},
+  {c:"JUAN PAULO TRONCOSO",p:"LPHC-39",a:"HGLZ-44"},{c:"JOSE LUIS LOPEZ",p:"RSCW-10",a:"PWWL-26"},
+  {c:"JUAN ESPINOSA",p:"SBFY-23",a:"PWYX-58"},{c:"JULIO SAN MARTIN",p:"SLTL-30",a:"PWYX-60"},
+  {c:"JOSE FIGUEROA",p:"SKKL-99",a:"PTYH-25"},{c:"ENRIQUE MOYA",p:"SKKL-93",a:"PWYX57"},
+  {c:"CARLOS CELEDON",p:"SJRL-66",a:"PWYX56"},{c:"MAURICIO GUERRERO",p:"SCGJ-93",a:"PWYX-55"},
+  {c:"JORGE ROJAS",p:"KKLL-43",a:""},{c:"JULIO GONZALEZ",p:"TVBY-30",a:"PXHW43"},
+  {c:"GERARDO OYARZO",p:"SXGF-92",a:"PWTT-70"},{c:"MAURICIO PEZOA",p:"PRKV-29",a:"PXHV-69"},
+  {c:"SEBASTIAN CACERES",p:"RYVJ-39",a:"PWYX-59"},{c:"KURT GROGG",p:"CWFW-58",a:"GRDP-25"},
+  {c:"PATRICIO PINO",p:"BLPK-47",a:"JK-2889"},{c:"FRANCISCO CASTRO",p:"JKZB-51",a:"JC-9898"},
+  {c:"EDUARDO ROMERO",p:"DKLZ-55",a:"GRDP-50"},{c:"MANUEL ARAYA",p:"DRBX-48",a:"KHDP79"},
+  {c:"ALEX FREDES",p:"FFZZ-14",a:"HXGJ18"},{c:"HERNAN LIZAMA",p:"HZGZ-51",a:"KYLY-48"},
+  {c:"FRANCISCO VARGAS",p:"LCPX-53",a:"JN-3232"},{c:"MIGUEL ARRIAGADA",p:"GWKV-11",a:"HXDF-23"},
+  {c:"PEDRO TRANAMIL",p:"RVTZ-27",a:"JN-1324"}
+];
+
+/* ---------- Estado ---------- */
+let registros = [];
+let filter = 'all';
+let pending = {1:null, 2:null};   // {blob, url}
+let signupMode = false;
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const val = id => $(id).value.trim();
+const esc = s => (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastTimer;
+function toast(msg, err){
+  const t = $('toast'); t.textContent = msg; t.className = 'toast show'+(err?' err':'');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.className='toast', 2400);
+}
+
+/* ============================================================
+   AUTENTICACIÓN
+============================================================ */
+async function handleLogin(){
+  const email = val('l-email'), pass = $('l-pass').value;
+  const errBox = $('loginErr'); errBox.style.display='none';
+  const btn = $('loginBtn'); btn.disabled = true;
+  const orig = btn.textContent; btn.textContent = signupMode ? 'Creando…' : 'Entrando…';
+  try{
+    const fn = signupMode
+      ? sb.auth.signUp({email, password:pass})
+      : sb.auth.signInWithPassword({email, password:pass});
+    const {data, error} = await fn;
+    if(error) throw error;
+    if(signupMode && !data.session){
+      errBox.textContent = 'Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.';
+      errBox.style.display='block'; setSignup(false);
+    }
+    // onAuthStateChange se encarga de mostrar la app si hay sesión
+  }catch(e){
+    errBox.textContent = traducirError(e.message); errBox.style.display='block';
+  }finally{
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+function traducirError(m){
+  if(/invalid login/i.test(m)) return 'Correo o contraseña incorrectos.';
+  if(/already registered/i.test(m)) return 'Ese correo ya tiene cuenta. Inicia sesión.';
+  if(/password should be at least/i.test(m)) return 'La contraseña debe tener al menos 6 caracteres.';
+  if(/fetch|network/i.test(m)) return 'Sin conexión o configuración incorrecta de Supabase.';
+  return m;
+}
+function setSignup(on){
+  signupMode = on;
+  $('loginBtn').textContent = on ? 'Crear cuenta' : 'Iniciar sesión';
+  $('loginToggle').innerHTML = on
+    ? '¿Ya tienes cuenta? <a id="toSignup">Inicia sesión</a>'
+    : '¿No tienes cuenta? <a id="toSignup">Crear una</a>';
+  $('toSignup').onclick = ()=>setSignup(!on);
+}
+
+async function mostrarApp(session){
+  if(!session){
+    $('login').style.display='flex'; $('app').classList.add('app-hidden'); return;
+  }
+  $('login').style.display='none'; $('app').classList.remove('app-hidden');
+  $('userEmail').textContent = session.user.email || '';
+  poblarConductores();
+  await recargar(true);
+}
+
+/* ============================================================
+   FORMULARIO
+============================================================ */
+function poblarConductores(){
+  $('f-conductor').innerHTML = '<option value="">Selecciona conductor…</option>'
+    + FLOTA.map(f=>`<option value="${esc(f.c)}">${esc(f.c)}</option>`).join('')
+    + '<option value="__otro__">Otro (no listado)…</option>';
+}
+function getConductor(){
+  const v = $('f-conductor').value;
+  return v==='__otro__' ? val('f-conductor-otro') : v;
+}
+function validarForm(){
+  $('saveBtn').disabled = !(val('f-guia').length>0 && (pending[1]||pending[2]));
+}
+function tilePreview(n,url){
+  const t = $('tile'+n); t.classList.add('filled');
+  t.innerHTML = '<span class="ptag">Foto '+n+(n===1?' · Guía':' · Respaldo')+'</span>'
+    + '<img src="'+url+'" alt="">' + '<span class="pretake">Cambiar</span>';
+}
+function tileReset(n){
+  const t = $('tile'+n); t.classList.remove('filled');
+  t.innerHTML = '<span class="ptag">Foto '+n+(n===1?' · Guía':' · Respaldo')+'</span>'
+    + '<span class="cam">📷</span>'
+    + '<span class="ptxt">'+(n===1?'Tomar foto de la guía':'Tomar segunda foto')+'</span>';
+}
+
+function comprimir(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const MAX = 1500; let w = img.width, h = img.height;
+        if(Math.max(w,h) > MAX){ const s = MAX/Math.max(w,h); w = Math.round(w*s); h = Math.round(h*s); }
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        c.toBlob(b => b ? resolve(b) : reject(new Error('blob')), 'image/jpeg', 0.72);
+      };
+      img.onerror = reject; img.src = reader.result;
+    };
+    reader.onerror = reject; reader.readAsDataURL(file);
+  });
+}
+function bindFoto(n){
+  $('f'+n).addEventListener('change', async e=>{
+    const file = e.target.files[0]; if(!file) return;
+    try{
+      toast('Procesando foto…');
+      const blob = await comprimir(file);
+      if(pending[n]?.url) URL.revokeObjectURL(pending[n].url);
+      const url = URL.createObjectURL(blob);
+      pending[n] = {blob, url};
+      tilePreview(n, url); validarForm();
+    }catch(err){ toast('No se pudo leer la foto', true); }
+  });
+}
+
+async function guardarRegistro(){
+  const btn = $('saveBtn');
+  const guia = val('f-guia'), origen = val('f-origen'), destino = val('f-destino'),
+        conductor = getConductor(), camion = val('f-camion'), acoplado = val('f-acoplado');
+  if(!guia){ toast('Falta el N° de guía', true); return; }
+  if(!pending[1] && !pending[2]){ toast('Toma al menos una foto', true); return; }
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try{
+    const {data:{user}} = await sb.auth.getUser();
+    // 1) crear fila
+    const {data:row, error:e1} = await sb.from('guias').insert({
+      guia, origen, destino, conductor, camion, acoplado, created_by:user.id
+    }).select().single();
+    if(e1) throw e1;
+
+    // 2) subir fotos a la nube
+    let p1=null, p2=null;
+    if(pending[1]){ p1 = `${row.id}/1.jpg`; const {error} = await sb.storage.from(BUCKET).upload(p1, pending[1].blob, {contentType:'image/jpeg', upsert:true}); if(error) throw error; }
+    if(pending[2]){ p2 = `${row.id}/2.jpg`; const {error} = await sb.storage.from(BUCKET).upload(p2, pending[2].blob, {contentType:'image/jpeg', upsert:true}); if(error) throw error; }
+
+    // 3) guardar rutas de las fotos
+    const {error:e3} = await sb.from('guias').update({foto1_path:p1, foto2_path:p2}).eq('id', row.id);
+    if(e3) throw e3;
+
+    resetForm();
+    toast('✓ Guía '+guia+' guardada');
+    await recargar(true);
+  }catch(e){
+    toast('Error al guardar: '+(e.message||'reintenta'), true);
+  }finally{
+    btn.textContent = 'Guardar registro'; validarForm();
+  }
+}
+function resetForm(){
+  ['f-guia','f-origen','f-destino','f-conductor','f-conductor-otro','f-camion','f-acoplado'].forEach(id=>$(id).value='');
+  $('otroWrap').style.display='none';
+  [1,2].forEach(n=>{ if(pending[n]?.url) URL.revokeObjectURL(pending[n].url); pending[n]=null; tileReset(n); });
+  $('f1').value=''; $('f2').value=''; $('saveBtn').disabled=true;
+}
+
+/* ============================================================
+   REPOSITORIO
+============================================================ */
+async function recargar(silencioso){
+  try{
+    const {data, error} = await sb.from('guias').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    registros = (data||[]).map(r=>({...r, f1:!!r.foto1_path, f2:!!r.foto2_path}));
+    renderRepo(); refrescarClientes();
+    if(!silencioso) toast('Lista actualizada');
+  }catch(e){ toast('No se pudo cargar: '+(e.message||''), true); }
+}
+function setFilter(f){
+  filter = f;
+  document.querySelectorAll('#filterSeg button').forEach(b=>b.classList.toggle('on', b.dataset.f===f));
+  renderRepo();
+}
+function renderRepo(){
+  const q = val('search').toLowerCase();
+  const list = $('repoList');
+  const filtrados = registros.filter(r=>{
+    if(filter==='pend' && r.cliente) return false;
+    if(filter==='done' && !r.cliente) return false;
+    if(q){
+      const blob = (r.guia+' '+r.origen+' '+r.destino+' '+r.cliente+' '+r.conductor+' '+(r.camion||'')+' '+(r.acoplado||'')).toLowerCase();
+      if(!blob.includes(q)) return false;
+    }
+    return true;
+  });
+  $('st-total').textContent = registros.length;
+  $('st-pend').textContent = registros.filter(r=>!r.cliente).length;
+  $('st-cli').textContent = new Set(registros.filter(r=>r.cliente).map(r=>r.cliente.toLowerCase())).size;
+
+  if(filtrados.length===0){
+    list.innerHTML = '<div class="empty"><div class="big">🚚</div><p><b>'
+      +(registros.length===0?'Aún no hay registros':'Sin resultados')+'</b></p><p>'
+      +(registros.length===0?'Toca “Registrar guía” para subir el primero.':'Prueba con otro filtro o búsqueda.')+'</p></div>';
+    return;
+  }
+  list.innerHTML = filtrados.map(r=>{
+    const asignado = !!r.cliente;
+    const f = new Date(r.created_at);
+    const fecha = f.toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
+    const hora = f.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="rec">
+      <div class="rec-top">
+        <span class="rec-guia"><span class="h">GUÍA</span>${esc(r.guia)}</span>
+        <span class="rec-chip ${asignado?'chip-done':'chip-pend'}">${asignado?'Asignado':'Sin asignar'}</span>
+      </div>
+      <div class="rec-route">
+        <div class="pt"><div class="k">Carga</div><div class="v">${esc(r.origen)||'—'}</div></div>
+        <div class="ar">▸</div>
+        <div class="pt"><div class="k">Descarga</div><div class="v">${esc(r.destino)||'—'}</div></div>
+      </div>
+      <div class="rec-meta">
+        ${r.conductor?`<span>Conductor: <b>${esc(r.conductor)}</b></span>`:''}
+        ${r.camion?`<span>Equipo: <b>${esc(r.camion)}</b>${r.acoplado?' / '+esc(r.acoplado):''}</span>`:''}
+        <span>${fecha} · ${hora}</span>
+        ${asignado?`<span>Cliente: <b>${esc(r.cliente)}</b></span>`:''}
+      </div>
+      <div class="rec-cliente">
+        <input type="text" list="clientesList" id="cli-${r.id}" placeholder="Asignar a cliente…" value="${esc(r.cliente)}">
+        <button class="save" data-asignar="${r.id}">Asignar</button>
+      </div>
+      <div class="rec-actions">
+        <button data-fotos="${r.id}" data-guia="${esc(r.guia)}">Ver fotos (${(r.f1?1:0)+(r.f2?1:0)})</button>
+        <button class="del" data-del="${r.id}" data-guia="${esc(r.guia)}">Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function asignar(id){
+  const cliente = $('cli-'+id).value.trim();
+  try{
+    const {error} = await sb.from('guias').update({cliente}).eq('id', id);
+    if(error) throw error;
+    const rec = registros.find(r=>r.id===id); if(rec) rec.cliente = cliente;
+    refrescarClientes(); renderRepo();
+    toast(cliente ? '✓ Asignado a '+cliente : 'Cliente quitado');
+  }catch(e){ toast('No se pudo asignar: '+(e.message||''), true); }
+}
+async function eliminar(id, guia){
+  if(!confirm('¿Eliminar el registro de la guía '+guia+'? Se borran también sus fotos.')) return;
+  try{
+    await sb.storage.from(BUCKET).remove([`${id}/1.jpg`, `${id}/2.jpg`]);
+    const {error} = await sb.from('guias').delete().eq('id', id);
+    if(error) throw error;
+    registros = registros.filter(r=>r.id!==id);
+    renderRepo(); refrescarClientes();
+    toast('Registro eliminado');
+  }catch(e){ toast('No se pudo eliminar: '+(e.message||''), true); }
+}
+async function verFotos(id, guia){
+  $('modalGuia').textContent = 'GUÍA '+guia;
+  const body = $('modalBody');
+  body.innerHTML = '<div class="nophoto" style="color:#9AA6B0">Cargando fotos…</div>';
+  $('modal').classList.add('open');
+  const rec = registros.find(r=>r.id===id);
+  const paths = [['Foto 1 · Guía', rec?.foto1_path], ['Foto 2 · Respaldo', rec?.foto2_path]].filter(p=>p[1]);
+  let html = '';
+  for(const [cap, path] of paths){
+    const {data} = await sb.storage.from(BUCKET).createSignedUrl(path, 3600);
+    if(data?.signedUrl) html += `<figure><figcaption>${cap}</figcaption><img src="${data.signedUrl}" alt="${cap}"></figure>`;
+  }
+  body.innerHTML = html || '<div class="nophoto">Este registro no tiene fotos guardadas.</div>';
+}
+function refrescarClientes(){
+  const set = [...new Set(registros.map(r=>r.cliente).filter(Boolean))].sort();
+  $('clientesList').innerHTML = set.map(c=>`<option value="${esc(c)}">`).join('');
+}
+function exportarCSV(){
+  if(registros.length===0){ toast('No hay registros para exportar', true); return; }
+  const cab = ['Guia','Origen','Destino','Conductor','Camion','Acoplado','Cliente','Fecha','Fotos'];
+  const cell = v => { v=(v==null?'':String(v)); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  const filas = registros.map(r=>[r.guia,r.origen,r.destino,r.conductor,r.camion||'',r.acoplado||'',r.cliente,
+    new Date(r.created_at).toLocaleString('es-CL'),(r.f1?1:0)+(r.f2?1:0)].map(cell).join(','));
+  const blob = new Blob(['\ufeff'+cab.join(',')+'\n'+filas.join('\n')], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = 'guias_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  URL.revokeObjectURL(url); toast('CSV exportado');
+}
+
+/* ============================================================
+   NAVEGACIÓN + EVENTOS
+============================================================ */
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
+  document.querySelectorAll('#app section').forEach(s=>s.classList.toggle('active', s.id===t));
+  if(t==='repo') recargar(true);
+  window.scrollTo(0,0);
+}
+
+// Login
+$('loginBtn').addEventListener('click', handleLogin);
+$('l-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
+$('toSignup').onclick = ()=>setSignup(true);
+$('logoutBtn').addEventListener('click', async ()=>{ await sb.auth.signOut(); });
+
+// Form
+bindFoto(1); bindFoto(2);
+['f-guia','f-origen','f-destino'].forEach(id=>$(id).addEventListener('input', validarForm));
+$('f-conductor').addEventListener('change', e=>{
+  const v = e.target.value, cam=$('f-camion'), aco=$('f-acoplado'), otro=$('otroWrap');
+  if(v==='__otro__'){ otro.style.display='block'; cam.value=''; aco.value=''; $('f-conductor-otro').focus(); }
+  else{ otro.style.display='none'; $('f-conductor-otro').value=''; const f=FLOTA.find(x=>x.c===v); cam.value=f?f.p:''; aco.value=f?f.a:''; }
+  validarForm();
+});
+$('saveBtn').addEventListener('click', guardarRegistro);
+
+// Tabs
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click', ()=>switchTab(b.dataset.tab)));
+
+// Repo
+$('search').addEventListener('input', renderRepo);
+document.querySelectorAll('#filterSeg button').forEach(b=>b.addEventListener('click', ()=>setFilter(b.dataset.f)));
+$('reloadBtn').addEventListener('click', ()=>recargar(false));
+$('csvBtn').addEventListener('click', exportarCSV);
+$('modalClose').addEventListener('click', ()=>$('modal').classList.remove('open'));
+
+// Delegación de eventos en la lista (botones generados dinámicamente)
+$('repoList').addEventListener('click', e=>{
+  const a = e.target.closest('[data-asignar]'); if(a){ asignar(a.dataset.asignar); return; }
+  const ff = e.target.closest('[data-fotos]'); if(ff){ verFotos(ff.dataset.fotos, ff.dataset.guia); return; }
+  const d = e.target.closest('[data-del]'); if(d){ eliminar(d.dataset.del, d.dataset.guia); return; }
+});
+
+/* ============================================================
+   ARRANQUE
+============================================================ */
+sb.auth.onAuthStateChange((_event, session)=>{ mostrarApp(session); });
+(async function init(){
+  if(SUPABASE_URL.startsWith('PEGA_')){
+    $('loginErr').textContent = 'Falta configurar SUPABASE_URL y la clave en el código (arriba del archivo).';
+    $('loginErr').style.display = 'block';
+  }
+  const {data:{session}} = await sb.auth.getSession();
+  mostrarApp(session);
+})();
+
+// Registrar service worker (para que se pueda instalar en el celular)
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
