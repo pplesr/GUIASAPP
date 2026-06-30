@@ -1,25 +1,28 @@
-// Service worker mínimo: hace la app instalable y cachea solo la "carcasa".
-// NO intercepta llamadas a Supabase ni a la nube de fotos (siempre van a la red).
-const CACHE = 'bitacora-v1';
-const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+// Service worker: la app SIEMPRE carga la última versión desde internet.
+// Solo guarda íconos y manifest (para poder instalarse). El index.html NO se
+// guarda en caché, así cualquier cambio que publiques se ve de inmediato.
+const CACHE = 'bitacora-v2';
+const ASSETS = ['manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  // Solo respondemos desde caché para archivos propios (misma URL). Todo lo demás
-  // (Supabase, esm.sh, fotos) pasa directo a la red sin tocarse.
-  if (url.origin === location.origin && e.request.method === 'GET') {
-    e.respondWith(caches.match(e.request).then((r) => r || fetch(e.request)));
+  if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    return;
   }
+  e.respondWith(caches.match(e.request).then((r) => r || fetch(e.request)));
 });
